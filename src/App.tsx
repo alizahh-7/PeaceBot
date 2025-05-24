@@ -1,9 +1,10 @@
+import { Layout } from "./Components/Layout"
 
 
 function App() {
   return (
     <>
-      Hello Ma Nigga
+      <Layout />
     </>
   )
 }
