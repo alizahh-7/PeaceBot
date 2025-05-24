@@ -1,8 +1,8 @@
 // Sidebar.tsx
 import { motion } from 'framer-motion';
-import { Home, AlertCircle, User, FileText, Mail, Settings } from 'lucide-react';
+import { Home, AlertCircle, User, FileText, Settings } from 'lucide-react';
 
-export const Sidebar = ({ activeTab, onTabChange }) => {
+export const Sidebar = ({ activeTab, onTabChange }:any) => {
   const menuItems = [
     { icon: <Home className="w-4 h-4" />, label: 'Home' },
     { icon: <AlertCircle className="w-4 h-4" />, label: 'Conflicts' },
