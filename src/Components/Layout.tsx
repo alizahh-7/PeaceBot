@@ -7,19 +7,17 @@ export const Layout = () => {
   const [activeTab, setActiveTab] = useState('Conflicts');
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-[500px] w-[350px] bg-gray-50"> {/* Standard extension size */}
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       
-      <main className="flex-1 p-6 overflow-auto">
-        <div className="max-w-5xl mx-auto">
-          {activeTab === 'Conflicts' ? (
-            <ConflictSummaries />
-          ) : (
-            <div className="p-8 text-center text-gray-500">
-              Feature coming soon
-            </div>
-          )}
-        </div>
+      <main className="flex-1 p-4 overflow-auto">
+        {activeTab === 'Conflicts' ? (
+          <ConflictSummaries />
+        ) : (
+          <div className="text-sm text-gray-500 p-4 text-center">
+            Select a feature
+          </div>
+        )}
       </main>
     </div>
   );
