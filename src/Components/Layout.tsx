@@ -7,7 +7,7 @@ export const Layout = () => {
   const [activeTab, setActiveTab] = useState('Conflicts');
 
   return (
-    <div className="flex h-[500px] w-[350px] bg-gray-50"> {/* Standard extension size */}
+    <div className="flex h-[600px] w-[350px] bg-gray-50"> {/* Standard extension size */}
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       
       <main className="flex-1 p-4 overflow-auto">

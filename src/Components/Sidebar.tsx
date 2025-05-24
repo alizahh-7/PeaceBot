@@ -1,41 +1,53 @@
 // Sidebar.tsx
 import { motion } from 'framer-motion';
-import { Home, AlertCircle, User, FileText, Mail } from 'lucide-react';
+import { Home, AlertCircle, User, FileText, Mail, Settings } from 'lucide-react';
 
-export const Sidebar = ({ activeTab, onTabChange }: { 
-  activeTab: string, 
-  onTabChange: (tab: string) => void 
-}) => {
+export const Sidebar = ({ activeTab, onTabChange }) => {
   const menuItems = [
-    { icon: <Home size={16} />, label: 'Home' },
-    { icon: <AlertCircle size={16} />, label: 'Conflicts' },
-    { icon: <User size={16} />, label: 'Profile' },
-    { icon: <FileText size={16} />, label: 'Docs' },
-    { icon: <Mail size={16} />, label: 'Messages' },
+    { icon: <Home className="w-4 h-4" />, label: 'Home' },
+    { icon: <AlertCircle className="w-4 h-4" />, label: 'Conflicts' },
+    { icon: <User className="w-4 h-4" />, label: 'Profile' },
+    { icon: <FileText className="w-4 h-4" />, label: 'Docs' },
+    { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
   ];
 
   return (
-    <div className="w-12 bg-white border-r border-gray-100 flex flex-col items-center py-3">
-      <div className="mb-4">
-        <div className="w-6 h-6 bg-blue-500 rounded-full" />
+    <motion.div 
+      className="w-14 bg-gradient-to-b from-[#1a1a1a] to-[#0d0d0d] flex flex-col items-center py-4 border-r border-white/10 backdrop-blur-lg"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <div className="mb-6">
+        <div className="w-8 h-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <span className="text-white font-bold text-sm">PW</span>
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-2">
+      <nav className="flex-1 space-y-4">
         {menuItems.map((item) => (
-          <button
+          <motion.button
             key={item.label}
             onClick={() => onTabChange(item.label)}
-            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors
+            className={`relative w-10 h-10 flex items-center justify-center rounded-xl transition-all
               ${activeTab === item.label 
-                ? 'bg-blue-50 text-blue-600' 
-                : 'text-gray-500 hover:bg-gray-50'}`}
+                ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 shadow-inner-glow'
+                : 'hover:bg-white/5'}`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <motion.span whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <span className={`transition-colors ${activeTab === item.label ? 'text-blue-400' : 'text-gray-400'}`}>
               {item.icon}
-            </motion.span>
-          </button>
+            </span>
+            {activeTab === item.label && (
+              <motion.div 
+                className="absolute -right-1 w-1 h-6 bg-blue-400 rounded-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              />
+            )}
+          </motion.button>
         ))}
       </nav>
-    </div>
+    </motion.div>
   );
 };
