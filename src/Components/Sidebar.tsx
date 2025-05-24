@@ -1,52 +1,57 @@
+// Sidebar.tsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Home, AlertCircle, User, FileText, Mail } from 'lucide-react';
+import { Home, AlertCircle, User, FileText, Mail, ChevronLeft } from 'lucide-react';
 
-export const Sidebar = () => {
-  const [activeItem, setActiveItem] = useState('Home');
+export const Sidebar = ({ activeTab, onTabChange }: { 
+  activeTab: string, 
+  onTabChange: (tab: string) => void 
+}) => {
+  const [collapsed, setCollapsed] = useState(false);
 
   const menuItems = [
-    { icon: <Home size={20} />, label: 'Home' },
-    { icon: <AlertCircle size={20} />, label: 'Conflicts' },
-    { icon: <User size={20} />, label: 'Profile' },
-    { icon: <FileText size={20} />, label: 'Documents' },
-    { icon: <Mail size={20} />, label: 'Messages' },
+    { icon: <Home size={18} />, label: 'Home' },
+    { icon: <AlertCircle size={18} />, label: 'Conflicts' },
+    { icon: <User size={18} />, label: 'Profile' },
+    { icon: <FileText size={18} />, label: 'Docs' },
+    { icon: <Mail size={18} />, label: 'Messages' },
   ];
 
   return (
     <motion.div
-      className="w-56 bg-white shadow-lg h-full flex flex-col"
-      initial={{ x: -224 }}
-      animate={{ x: 0 }}
-      transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+      className={`bg-white border-r border-gray-100 flex flex-col ${collapsed ? 'w-16' : 'w-48'}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div className="p-4 border-b border-gray-100">
-        <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+      <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+        {!collapsed && <h1 className="text-sm font-semibold text-gray-900">PeaceWorkspace</h1>}
+        <button 
+          onClick={() => setCollapsed(!collapsed)}
+          className="text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <ChevronLeft className={`transform ${collapsed ? 'rotate-180' : ''}`} size={18} />
+        </button>
       </div>
-      <nav className="flex-1 p-3 space-y-1">
-        {menuItems.map((item, index) => (
+
+      <nav className="flex-1 p-2 space-y-1">
+        {menuItems.map((item) => (
           <button
-            key={index}
-            onClick={() => setActiveItem(item.label)}
-            className={`w-full flex items-center px-3 py-2.5 rounded-lg text-gray-700 transition-all duration-200 
-                     hover:bg-gray-50 ${activeItem === item.label ? 'bg-blue-50 text-blue-600' : ''}`}
+            key={item.label}
+            onClick={() => onTabChange(item.label)}
+            className={`w-full flex items-center p-2 rounded-lg text-sm transition-colors
+              ${activeTab === item.label 
+                ? 'bg-blue-50 text-blue-600' 
+                : 'text-gray-600 hover:bg-gray-50'}`}
           >
-            <span className={`${activeItem === item.label ? 'text-blue-600' : 'text-gray-500'} transition-colors duration-200`}>
+            <span className={`shrink-0 ${collapsed ? 'mx-auto' : 'mr-3'}`}>
               {item.icon}
             </span>
-            <span className="font-medium ml-3 text-sm">{item.label}</span>
+            {!collapsed && (
+              <span className="truncate font-medium">{item.label}</span>
+            )}
           </button>
         ))}
       </nav>
-      <div className="p-3 border-t border-gray-100">
-        <div className="flex items-center space-x-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-gray-200"></div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">User Session</p>
-            <p className="text-xs text-gray-500">Workspace</p>
-          </div>
-        </div>
-      </div>
     </motion.div>
   );
-}
+};

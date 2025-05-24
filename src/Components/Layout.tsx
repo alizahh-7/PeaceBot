@@ -1,34 +1,26 @@
-import React from 'react';
+// Layout.tsx
+import { useState } from 'react';
 import { Sidebar } from './Sidebar';
+import { ConflictSummaries } from './ConflictSummariser';
 
-export const Layout: React.FC = () => {
+export const Layout = () => {
+  const [activeTab, setActiveTab] = useState('Conflicts');
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar />
-      <main className="flex-1 p-8 overflow-auto">
-        <div className="max-w-7xl mx-auto">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
-                <p className="mt-1 text-sm text-gray-500">Here's what's happening in your workspace.</p>
-              </div>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      <main className="flex-1 p-6 overflow-auto">
+        <div className="max-w-5xl mx-auto">
+          {activeTab === 'Conflicts' ? (
+            <ConflictSummaries />
+          ) : (
+            <div className="p-8 text-center text-gray-500">
+              Feature coming soon
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-                <p className="text-gray-600">Access your most frequently used tools and features here.</p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-                <p className="text-gray-600">Track your latest actions and changes in real-time.</p>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </main>
     </div>
   );
-}
+};
