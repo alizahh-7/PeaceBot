@@ -1,37 +1,19 @@
-
 {
   "manifest_version": 3,
   "name": "PeaceBot",
   "version": "1.0",
-  "description": "Conflict education chatbot with real-time summaries and fact-checking",
+  "description": "AI-powered conflict analysis for web content",
   "permissions": [
     "activeTab",
-    "storage",
     "scripting",
     "tabs"
   ],
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ],
-  "action": {
-    "default_popup": "index.html",
-    "default_title": "PeaceBot"
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["dist/*"],
-      "matches": ["<all_urls>"]
-    }
-  ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
+  "action": {
+    "default_popup": "index.html"
   }
 }
