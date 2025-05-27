@@ -1,6 +1,6 @@
 // Sidebar.tsx
 import { motion } from 'framer-motion';
-import { Bot, AlertCircle, User, Book, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'; // Added MessageCircle
+import { MessageCircle, AlertCircle, ShieldCheck, User, Book, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const Sidebar = ({ 
   activeTab,
@@ -12,17 +12,15 @@ export const Sidebar = ({
   onToggleSidebar: () => void;
 }) => {
   const menuItems = [
-    { icon: <Bot size={18} />, label: 'chat' },
-    { icon: <AlertCircle size={18} />, label: 'conflicts' },
-    // New ChatBot button at 3rd position
-    { icon: <MessageCircle size={18} />, label: 'chatbot' }, 
+    { icon: <MessageCircle size={18} />, label: 'chat' },        // ChatBot
+    { icon: <AlertCircle size={18} />, label: 'conflicts' },    // Conflicts
+    { icon: <ShieldCheck size={18} />, label: 'factcheck' },    // Fact Checker
     { icon: <User size={18} />, label: 'profile' },
     { icon: <Book size={18} />, label: 'docs' },
   ];
 
   return (
     <div className="h-full bg-gradient-to-b from-[#1a1a1a] to-[#0d0d0d] flex flex-col items-center py-4 border-r border-white/10 backdrop-blur-lg">
-      {/* Toggle Button */}
       <button 
         onClick={onToggleSidebar}
         className="mb-6 p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -30,7 +28,6 @@ export const Sidebar = ({
         <ChevronLeft className="w-5 h-5 text-gray-400" />
       </button>
 
-      {/* Navigation Items */}
       <nav className="flex-1 space-y-3 w-full px-2">
         {menuItems.map((item) => (
           <motion.button
@@ -58,7 +55,6 @@ export const Sidebar = ({
         ))}
       </nav>
 
-      {/* Footer remains unchanged */}
       <div className="mt-auto w-full px-2">
         <button className="w-full p-2 hover:bg-white/5 rounded-lg transition-colors">
           <ChevronRight className="w-5 h-5 text-gray-400 mx-auto" />

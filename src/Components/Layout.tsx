@@ -2,12 +2,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
+import { ChatBot } from './ChatBot';
+import { FactChecker } from './FactChecker';
 import { ChatAnalysis } from './ChatAnalysis';
 import { ConflictSummaries } from './ConflictSummariser';
-import { ChatBot } from './ChatBot'; // Import the ChatBot component
 
 export const Layout = () => {
-  const [activeTab, setActiveTab] = useState<'chat' | 'conflicts' | 'chatbot' | 'profile' | 'docs'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'conflicts' | 'factcheck' | 'profile' | 'docs'>('chat');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -30,15 +31,13 @@ export const Layout = () => {
         animate={{ opacity: 1 }}
       >
         {activeTab === 'chat' ? (
-          <ChatAnalysis />
+          <ChatBot />
         ) : activeTab === 'conflicts' ? (
           <ConflictSummaries />
-        ) : activeTab === 'chatbot' ? ( // New chatbot case
-          <ChatBot />
+        ) : activeTab === 'factcheck' ? (
+          <FactChecker />
         ) : activeTab === 'profile' ? (
-          <div className="h-full flex items-center justify-center text-gray-400">
-            <p className="text-sm">Profile Section</p>
-          </div>
+          <ChatAnalysis />
         ) : activeTab === 'docs' ? (
           <div className="h-full flex items-center justify-center text-gray-400">
             <p className="text-sm">Documentation</p>
