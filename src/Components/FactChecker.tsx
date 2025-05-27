@@ -101,9 +101,9 @@ export const FactChecker = () => {
 
   return (
     <div className="h-full flex flex-col p-4 bg-white dark:bg-gray-900">
-      <div className="flex items-center gap-3 mb-6">
-        <ShieldCheck className="w-6 h-6 text-green-500" />
-        <h2 className="text-lg font-semibold">Fact Check Report</h2>
+      <div className="flex items-center gap-3 mb-6 text-white">
+        <ShieldCheck className="w-6 h-6 text-white" />
+        <h2 className="text-lg font-semibold text-white">Fact Check Report</h2>
       </div>
 
       {state.loading ? (
@@ -118,19 +118,21 @@ export const FactChecker = () => {
       ) : state.result ? (
         <div className="space-y-4">
           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm">Credibility Score</span>
-              <span className="font-medium">{state.result.credibilityScore}/100</span>
-            </div>
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-              <div 
-                className="h-full bg-green-500 rounded-full transition-all duration-500"
-                style={{ width: `${state.result.credibilityScore}%` }}
-              />
-            </div>
-          </div>
+  <div className="flex items-center justify-between mb-2">
+    <span className="text-sm text-gray-700 dark:text-gray-300">Credibility Score</span>
+    <span className="font-medium text-gray-900 dark:text-white">
+      {state.result.credibilityScore}/100
+    </span>
+  </div>
+  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+    <div 
+      className="h-full bg-blue-500 dark:bg-blue-400 rounded-full transition-all duration-500"
+      style={{ width: `${state.result.credibilityScore}%` }}
+    />
+  </div>
+</div>
 
-          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="p-4 bg-gray-50 text-white dark:bg-gray-800 rounded-lg">
             <h3 className="font-medium mb-2">Key Claims Verified</h3>
             <ul className="list-disc pl-4 space-y-2">
               {state.result.claims.map((claim, i) => (
