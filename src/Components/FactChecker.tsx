@@ -3,25 +3,55 @@ import { useState, useEffect } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
 
+type FactCheckResult = {
+  credibilityScore: number;
+  claims: string[];
+  sources: string[];
+  analysis: string;
+};
+
 export const FactChecker = () => {
   const [state, setState] = useState({
     loading: true,
     error: null as string | null,
-    credibilityScore: 0,
-    claims: [] as string[],
-    sources: [] as string[],
-    analysis: '',
+    result: null as FactCheckResult | null,
   });
+
+  const cleanJsonResponse = (text: string) => {
+    try {
+      // Remove markdown code blocks
+      let cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      // Handle cases where response might start with "json"
+      cleaned = cleaned.replace(/^json\s*/i, '');
+      
+      // Remove extra characters that might break parsing
+      cleaned = cleaned.replace(/[\x00-\x1F\x7F]/g, '');
+      
+      return cleaned;
+    } catch (error) {
+      throw new Error('Failed to clean API response');
+    }
+  };
+
+  const validateResult = (data: any): data is FactCheckResult => {
+    return (
+      typeof data.credibilityScore === 'number' &&
+      Array.isArray(data.claims) &&
+      Array.isArray(data.sources) &&
+      typeof data.analysis === 'string'
+    );
+  };
 
   useEffect(() => {
     const analyzePage = async () => {
       try {
         //@ts-ignore
-
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
         if (!tab?.id) throw new Error('No active tab found');
         //@ts-ignore
+        
         const results = await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: () => document.body.innerText
@@ -34,30 +64,34 @@ export const FactChecker = () => {
         const prompt = `Analyze this web page content for factual accuracy:
         ${pageContent}
 
-        Respond with JSON format:
+        Respond with JSON format ONLY (no markdown, no extra text):
         {
           "credibilityScore": 0-100,
-          "claims": ["claim1", "claim2", "claim3"],
-          "sources": ["source1.com", "source2.org"],
-          "analysis": "detailed summary"
+          "claims": ["array of factual claims"],
+          "sources": ["array of source domains"],
+          "analysis": "string with detailed summary"
         }`;
 
         const result = await model.generateContent(prompt);
-        const response = JSON.parse(result.response.text());
+        const rawText = result.response.text();
+        const cleanedText = cleanJsonResponse(rawText);
+        const parsedData = JSON.parse(cleanedText);
+
+        if (!validateResult(parsedData)) {
+          throw new Error('Invalid response structure from API');
+        }
 
         setState({
           loading: false,
           error: null,
-          credibilityScore: response.credibilityScore,
-          claims: response.claims,
-          sources: response.sources,
-          analysis: response.analysis
+          result: parsedData
         });
       } catch (error) {
+        console.error('Fact check error:', error);
         setState({
-          ...state,
           loading: false,
-          error: error instanceof Error ? error.message : 'Fact check failed'
+          error: error instanceof Error ? error.message : 'Fact check failed',
+          result: null
         });
       }
     };
@@ -79,19 +113,19 @@ export const FactChecker = () => {
       ) : state.error ? (
         <div className="flex-1 flex flex-col items-center justify-center text-red-500">
           <AlertCircle className="w-12 h-12 mb-4" />
-          <p>{state.error}</p>
+          <p className="text-center">{state.error}</p>
         </div>
-      ) : (
+      ) : state.result ? (
         <div className="space-y-4">
           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm">Credibility Score</span>
-              <span className="font-medium">{state.credibilityScore}/100</span>
+              <span className="font-medium">{state.result.credibilityScore}/100</span>
             </div>
             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
               <div 
                 className="h-full bg-green-500 rounded-full transition-all duration-500"
-                style={{ width: `${state.credibilityScore}%` }}
+                style={{ width: `${state.result.credibilityScore}%` }}
               />
             </div>
           </div>
@@ -99,7 +133,7 @@ export const FactChecker = () => {
           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <h3 className="font-medium mb-2">Key Claims Verified</h3>
             <ul className="list-disc pl-4 space-y-2">
-              {state.claims.map((claim, i) => (
+              {state.result.claims.map((claim, i) => (
                 <li key={i} className="text-sm">{claim}</li>
               ))}
             </ul>
@@ -108,7 +142,7 @@ export const FactChecker = () => {
           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <h3 className="font-medium mb-2">Cited Sources</h3>
             <div className="flex flex-wrap gap-2">
-              {state.sources.map((source, i) => (
+              {state.result.sources.map((source, i) => (
                 <span 
                   key={i}
                   className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full text-xs"
@@ -121,10 +155,10 @@ export const FactChecker = () => {
 
           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <h3 className="font-medium mb-2">Detailed Analysis</h3>
-            <p className="text-sm whitespace-pre-wrap">{state.analysis}</p>
+            <p className="text-sm whitespace-pre-wrap">{state.result.analysis}</p>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

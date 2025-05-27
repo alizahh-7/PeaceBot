@@ -1,8 +1,7 @@
-// src/components/ChatBot.tsx
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Loader2, Bot, Send, Globe } from 'lucide-react';
+import { Bot, Globe, Loader2, Send } from 'lucide-react';
 
 type ChatMessage = {
   id: string;
@@ -12,6 +11,7 @@ type ChatMessage = {
   status?: 'loading' | 'error';
 };
 
+// Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY2 || '');
 
 export const ChatBot = () => {
@@ -20,6 +20,12 @@ export const ChatBot = () => {
   const [pageContent, setPageContent] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   // Get current page content
   useEffect(() => {
@@ -29,8 +35,7 @@ export const ChatBot = () => {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
         if (tab?.id) {
-        //@ts-ignore
-
+          //@ts-ignore
           const results = await chrome.scripting.executeScript({
             target: { tabId: tab.id },
             func: () => document.body.innerText
@@ -39,11 +44,11 @@ export const ChatBot = () => {
           setPageContent(results[0].result.slice(0, 15000)); // Limit content length
           setIsLoading(false);
           
-          // Add initial message
+          // Add initial welcome message
           setMessages([{
             id: 'welcome',
             role: 'assistant',
-            content: `I'm analyzing: ${tab.title}\nAsk me about this page's conflict-related content.`,
+            content: `I'm analyzing: ${tab.title || 'Current page'}\nAsk me about this page's conflict-related content.`,
             timestamp: Date.now()
           }]);
         }
@@ -51,7 +56,7 @@ export const ChatBot = () => {
         setMessages([{
           id: 'error',
           role: 'assistant',
-          content: 'Failed to analyze page content',
+          content: 'Failed to analyze page content. Please try again.',
           timestamp: Date.now(),
           status: 'error'
         }]);
@@ -61,6 +66,13 @@ export const ChatBot = () => {
 
     getPageContent();
   }, []);
+
+  // Focus input when loading completes
+  useEffect(() => {
+    if (!isLoading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,9 +123,9 @@ export const ChatBot = () => {
       setMessages(prev => [
         ...prev.filter(msg => msg.id !== 'loading'),
         {
-          id: 'error',
+          id: Date.now().toString(),
           role: 'assistant',
-          content: error instanceof Error ? error.message : 'Analysis failed',
+          content: error instanceof Error ? error.message : 'Analysis failed. Please try again.',
           timestamp: Date.now(),
           status: 'error'
         }
@@ -122,85 +134,142 @@ export const ChatBot = () => {
   };
 
   return (
-    <div className="h-[600px] w-[400px] flex flex-col bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl">
+    <div className="h-[600px] w-[340px] flex flex-col bg-white dark:bg-gray-900 overflow-hidden rounded-lg shadow-xl">
       {/* Header */}
-      <div className="p-4 bg-gray-50 dark:bg-gray-800 border-b flex items-center gap-3">
+      <motion.div 
+        className="px-2.5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 border-b border-blue-700 flex items-center gap-2"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         <motion.div 
-          className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          className="w-7 h-7 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
+          animate={{ 
+            rotate: [0, 360],
+            scale: [1, 1.05, 1]
+          }}
+          transition={{ 
+            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+            scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+          }}
         >
-          <Globe className="w-5 h-5 text-white" />
+          <Globe className="w-3.5 h-3.5 text-white" />
         </motion.div>
         <div>
-          <h1 className="font-semibold">Page Analyst</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Context-Aware Conflict Detection</p>
+          <h1 className="font-semibold text-white text-sm tracking-tight">Page Analyst</h1>
+          <p className="text-[10px] text-blue-100">Context-Aware Conflict Detection</p>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto p-2.5 text-white bg-gray-50 dark:bg-gray-900">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          </div>
+          <motion.div 
+            className="flex flex-col items-center justify-center h-full gap-2 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              animate={{ 
+                rotate: 360,
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ 
+                rotate: { duration: 1.5, repeat: Infinity, ease: "linear" },
+                scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+              }}
+            >
+              <Loader2 className="w-7 h-7 text-blue-500" />
+            </motion.div>
+            <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">Analyzing page content...</p>
+          </motion.div>
         ) : (
-          <AnimatePresence>
-            {messages.map((message) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`max-w-[85%] p-3 rounded-xl ${
-                  message.role === 'user' 
-                    ? 'bg-blue-500 text-white' 
-                    : message.status === 'error'
-                      ? 'bg-red-100 dark:bg-red-900/20 border border-red-200'
-                      : 'bg-gray-100 dark:bg-gray-800'
-                }`}>
-                  {message.status === 'loading' ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Analyzing page...</span>
-                    </div>
-                  ) : (
-                    <>
-                      {message.role === 'assistant' && <Bot className="w-5 h-5 mb-2 text-blue-500" />}
-                      <div className="prose prose-sm dark:prose-invert">
-                        {message.content}
+          <motion.div 
+            className="space-y-2.5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <AnimatePresence>
+              {messages.map((message) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div 
+                    className={`max-w-[90%] rounded-xl shadow-sm ${
+                      message.role === 'user' 
+                        ? 'bg-blue-500 text-white px-2.5 py-1.5 rounded-br-none' 
+                        : message.status === 'error'
+                          ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-2.5 py-1.5'
+                          : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-2.5 py-1.5 rounded-bl-none'
+                    }`}
+                  >
+                    {message.status === 'loading' ? (
+                      <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                        <span className="text-[11px] font-medium">Analyzing page...</span>
                       </div>
-                    </>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                    ) : (
+                      <>
+                        {message.role === 'assistant' && !message.status && (
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <div className="w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                              <Bot className="w-2.5 h-2.5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <span className="text-[10px] font-medium text-blue-600 dark:text-blue-400">Analyst</span>
+                          </div>
+                        )}
+                        <div className={`prose prose-sm ${message.role === 'user' ? 'prose-invert' : 'dark:prose-invert'} max-w-none`}>
+                          <div className="whitespace-pre-line text-[11px] leading-relaxed">
+                            {message.content}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            <div ref={messagesEndRef} />
+          </motion.div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="p-4 border-t">
-        <div className="relative">
+      {/* Input Area */}
+      <motion.div 
+        className="p-2 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
+        <form onSubmit={handleSubmit} className="relative">
           <input
+            ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about this page..."
-            className="w-full pl-4 pr-12 py-2 rounded-full bg-gray-50 dark:bg-gray-800 border focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-2.5 pr-9 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 border-none focus:ring-2 focus:ring-blue-500 text-xs text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             disabled={isLoading}
           />
-          <button
+          <motion.button
             type="submit"
-            disabled={isLoading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+            disabled={isLoading || !input.trim()}
+            className={`absolute right-1 top-1/2 -translate-y-1/2 p-1 ${
+              !input.trim() ? 'bg-gray-400 dark:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+            } text-white rounded-full transition-colors duration-200`}
+            whileTap={{ scale: 0.95 }}
           >
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
-      </form>
+            <Send className="w-3 h-3" />
+          </motion.button>
+        </form>
+      </motion.div>
     </div>
   );
 };
