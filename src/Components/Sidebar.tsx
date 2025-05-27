@@ -1,6 +1,6 @@
 // Sidebar.tsx
 import { motion } from 'framer-motion';
-import { Bot, AlertCircle, User, Book, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Bot, AlertCircle, User, Book, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'; // Added MessageCircle
 
 export const Sidebar = ({ 
   activeTab,
@@ -14,6 +14,8 @@ export const Sidebar = ({
   const menuItems = [
     { icon: <Bot size={18} />, label: 'chat' },
     { icon: <AlertCircle size={18} />, label: 'conflicts' },
+    // New ChatBot button at 3rd position
+    { icon: <MessageCircle size={18} />, label: 'chatbot' }, 
     { icon: <User size={18} />, label: 'profile' },
     { icon: <Book size={18} />, label: 'docs' },
   ];
@@ -56,7 +58,7 @@ export const Sidebar = ({
         ))}
       </nav>
 
-      {/* Footer */}
+      {/* Footer remains unchanged */}
       <div className="mt-auto w-full px-2">
         <button className="w-full p-2 hover:bg-white/5 rounded-lg transition-colors">
           <ChevronRight className="w-5 h-5 text-gray-400 mx-auto" />
