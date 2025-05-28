@@ -40,7 +40,7 @@ export const Layout = () => {
           <PeaceImpactAnalysis />
         ) : activeTab === 'docs' ? (
           <div className="h-full flex items-center justify-center text-gray-400">
-            <p className="text-sm">Documentation</p>
+            <p className="text-sm">To Be Implemented</p>
           </div>
         ) : null}
       </motion.main>
