@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { ChatBot } from './ChatBot';
 import { FactChecker } from './FactChecker';
-import { ChatAnalysis } from './ChatAnalysis';
+import { PeaceImpactAnalysis } from './ChatAnalysis';
 import { ConflictSummaries } from './ConflictSummariser';
 
 export const Layout = () => {
@@ -37,7 +37,7 @@ export const Layout = () => {
         ) : activeTab === 'factcheck' ? (
           <FactChecker />
         ) : activeTab === 'profile' ? (
-          <ChatAnalysis />
+          <PeaceImpactAnalysis />
         ) : activeTab === 'docs' ? (
           <div className="h-full flex items-center justify-center text-gray-400">
             <p className="text-sm">Documentation</p>
