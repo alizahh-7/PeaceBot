@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, CheckCircle2, Clock, BarChart, Loader2, X, Map, Globe } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY2 || '');
@@ -79,7 +79,7 @@ const ConflictListModal = ({
     exit={{ opacity: 0 }}
   >
     <motion.div
-      className="bg-gradient-to-br from-[#0a0a0a] to-[#161616] rounded-2xl border border-white/10 max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl relative"
+      className="bg-gradient-to-br from-[#0a0a0a] to-[#161616] rounded-2xl border border-white/10 max-w-2xl w-full max-h-[85vh] flex flex-col"
       initial={{ scale: 0.9, y: 40 }}
       animate={{ scale: 1, y: 0 }}
       exit={{ scale: 0.9, y: 40 }}
@@ -102,8 +102,8 @@ const ConflictListModal = ({
         </button>
       </div>
       
-      <div className="p-6 overflow-y-auto max-h-[60vh]">
-        <ul className="space-y-4">
+      <div className="overflow-y-auto flex-1">
+        <ul className="space-y-4 p-6">
           {items.map((item, index) => (
             <motion.li
               key={index}
@@ -209,6 +209,7 @@ export const ConflictSummaries = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<'active' | 'resolved' | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const fetchConflictData = async () => {
     try {
@@ -291,12 +292,12 @@ export const ConflictSummaries = () => {
   const getTrendData = (trend: { value: string; direction: 'up' | 'down' }) => ({
     value: `${trend.value} ${trend.direction === 'up' ? 'Increase' : 'Decrease'}`,
     color: trend.direction === 'up' ? 'text-red-400' : 'text-green-400',
-    icon: trend.direction === 'up' ? BarChart : BarChart
+    icon: BarChart
   });
 
   if (loading) {
     return (
-      <div className="h-[700px] flex flex-col items-center justify-center bg-gradient-to-br from-[#0c0c0c] to-[#141414]">
+      <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0c0c0c] to-[#141414]">
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
@@ -321,7 +322,7 @@ export const ConflictSummaries = () => {
 
   if (error) {
     return (
-      <div className="h-[700px] flex flex-col items-center justify-center bg-gradient-to-br from-[#0c0c0c] to-[#141414] p-6">
+      <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0c0c0c] to-[#141414] p-6">
         <motion.div
           className="p-5 bg-gradient-to-br from-red-900/20 to-transparent rounded-full border border-red-500/30"
           initial={{ scale: 0.8 }}
@@ -355,102 +356,110 @@ export const ConflictSummaries = () => {
   }
 
   return (
-    <div className="min-h-[700px] bg-gradient-to-br from-[#0c0c0c] to-[#141414] overflow-hidden relative">
+    <div className="min-h-screen bg-gradient-to-br from-[#0c0c0c] to-[#141414] overflow-hidden relative">
       {/* Background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/4 w-64 h-64 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-full blur-3xl"></div>
       </div>
       
-      <div className="relative z-10 p-6">
-        <motion.header
-          className="mb-8"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex justify-between items-start">
-            <div>
-              <motion.h1 
-                className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                Conflict Intelligence
-              </motion.h1>
-              <motion.p 
-                className="text-gray-400 mt-2"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                Real-time global conflict monitoring & analysis
-              </motion.p>
-            </div>
-            <motion.div
-              className="p-3 bg-gradient-to-br from-[#1a1a1a] to-[#101010] rounded-xl border border-white/10"
-              initial={{ opacity: 0, rotate: -30 }}
-              animate={{ opacity: 1, rotate: 0 }}
-              transition={{ delay: 0.4 }}
+      {/* Scrollable content container */}
+      <div 
+        ref={contentRef}
+        className="relative z-10 h-screen flex flex-col overflow-hidden"
+      >
+        <div className="overflow-y-auto flex-1">
+          <div className="p-6">
+            <motion.header
+              className="mb-8"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
             >
-              <Globe className="w-6 h-6 text-blue-400" />
-            </motion.div>
+              <div className="flex justify-between items-start">
+                <div>
+                  <motion.h1 
+                    className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    Conflict Intelligence
+                  </motion.h1>
+                  <motion.p 
+                    className="text-gray-400 mt-2"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Real-time global conflict monitoring & analysis
+                  </motion.p>
+                </div>
+                <motion.div
+                  className="p-3 bg-gradient-to-br from-[#1a1a1a] to-[#101010] rounded-xl border border-white/10"
+                  initial={{ opacity: 0, rotate: -30 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Globe className="w-6 h-6 text-blue-400" />
+                </motion.div>
+              </div>
+            </motion.header>
+
+            {stats && (
+              <>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                  <StatsCard
+                    icon={<AlertCircle className="w-6 h-6 text-red-400" />}
+                    title="Active Conflicts"
+                    value={stats.activeConflicts}
+                    trend={getTrendData(stats.trends.active)}
+                    onClick={() => setActiveModal('active')}
+                  />
+
+                  <StatsCard
+                    icon={<CheckCircle2 className="w-6 h-6 text-green-400" />}
+                    title="Resolutions"
+                    value={stats.resolutions}
+                    trend={getTrendData(stats.trends.resolutions)}
+                    onClick={() => setActiveModal('resolved')}
+                  />
+
+                  <StatsCard
+                    icon={<Clock className="w-6 h-6 text-yellow-400" />}
+                    title="Resolution Time"
+                    value={stats.avgResolutionTime}
+                    trend={getTrendData(stats.trends.resolutionTime)}
+                    onClick={() => {}}
+                  />
+                </div>
+
+                <div className="mb-8">
+                  <WorldMapVisualization />
+                </div>
+              </>
+            )}
           </div>
-        </motion.header>
+        </div>
+      </div>
 
-        {stats && (
-          <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <StatsCard
-                icon={<AlertCircle className="w-6 h-6 text-red-400" />}
-                title="Active Conflicts"
-                value={stats.activeConflicts}
-                trend={getTrendData(stats.trends.active)}
-                onClick={() => setActiveModal('active')}
-              />
-
-              <StatsCard
-                icon={<CheckCircle2 className="w-6 h-6 text-green-400" />}
-                title="Resolutions"
-                value={stats.resolutions}
-                trend={getTrendData(stats.trends.resolutions)}
-                onClick={() => setActiveModal('resolved')}
-              />
-
-              <StatsCard
-                icon={<Clock className="w-6 h-6 text-yellow-400" />}
-                title="Resolution Time"
-                value={stats.avgResolutionTime}
-                trend={getTrendData(stats.trends.resolutionTime)}
-                onClick={() => {}}
-              />
-            </div>
-
-            <div className="mb-8">
-              <WorldMapVisualization />
-            </div>
-          </>
+      <AnimatePresence>
+        {activeModal === 'active' && stats?.activeConflictList && (
+          <ConflictListModal
+            title="Active Global Conflicts"
+            items={stats.activeConflictList}
+            onClose={() => setActiveModal(null)}
+          />
         )}
 
-        <AnimatePresence>
-          {activeModal === 'active' && stats?.activeConflictList && (
-            <ConflictListModal
-              title="Active Global Conflicts"
-              items={stats.activeConflictList}
-              onClose={() => setActiveModal(null)}
-            />
-          )}
-
-          {activeModal === 'resolved' && stats?.resolvedConflictList && (
-            <ConflictListModal
-              title="Recently Resolved Conflicts"
-              items={stats.resolvedConflictList}
-              onClose={() => setActiveModal(null)}
-            />
-          )}
-        </AnimatePresence>
-      </div>
+        {activeModal === 'resolved' && stats?.resolvedConflictList && (
+          <ConflictListModal
+            title="Recently Resolved Conflicts"
+            items={stats.resolvedConflictList}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
